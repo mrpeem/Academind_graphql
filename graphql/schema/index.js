@@ -27,12 +27,23 @@ module.exports = buildSchema(`
     password: String!
   }
 
+  type BookingType {
+    _id: ID!
+    event: EventType!
+    user: UserType!
+    createdAt: String!
+    updatedAt: String!
+  }
+
   type RootQuery {
     events: [EventType!]!
+    bookings: [BookingType!]!
   } 
   type RootMutation {
     createEvent(eventInput: EventInput): EventType
     createUser(userInput: UserInput): UserType
+    bookEvent(eventId: ID!): BookingType
+    cancelBooking(bookingId: ID!): EventType
   }      
   schema {
     query: RootQuery
