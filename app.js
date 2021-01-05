@@ -66,64 +66,106 @@ app.use('/graphql', graphqlHTTP({
           throw err;
         });
     },
-    createEvent: (args) => {
+    // createEvent: (args) => {
 
-      // create mongoose object
-      const event = new Event({
-        title: args.eventInput.title,
-        description: args.eventInput.description,
-        price: +args.eventInput.price,
-        date: new Date( args.eventInput.date ),
-        creator: '5ff402f05e96c9e87afadee2'
-      });
+    //   // create mongoose object
+    //   const event = new Event({
+    //     title: args.eventInput.title,
+    //     description: args.eventInput.description,
+    //     price: +args.eventInput.price,
+    //     date: new Date( args.eventInput.date ),
+    //     creator: '5ff402f05e96c9e87afadee2'
+    //   });
 
-      let createdEvent;
+    //   let createdEvent;
 
-      // save to mongodb
-      return event
-        .save()
-        .then( data => {
-          console.log(data);
-          createdEvent = { ...data._doc };
-          return User.findById('5ff402f05e96c9e87afadee2');
-        })
-        .then( user => {
-          if (!user) {
-            throw new Error('User does not exists');
-          }
-          user.createdEvents.push(event);
-          return user.save();
-        })
-        .then( result => {
-          return createdEvent;
-        })
-        .catch( err => {
-          console.log(err);
-          throw err;
+    //   // save to mongodb
+    //   return event
+    //     .save()
+    //     .then( data => {
+    //       console.log(data);
+    //       createdEvent = { ...data._doc };
+    //       return User.findById('5ff402f05e96c9e87afadee2');
+    //     })
+    //     .then( user => {
+    //       if (!user) {
+    //         throw new Error('User does not exists');
+    //       }
+    //       user.createdEvents.push(event);
+    //       return user.save();
+    //     })
+    //     .then( result => {
+    //       return createdEvent;
+    //     })
+    //     .catch( err => {
+    //       console.log(err);
+    //       throw err;
+    //     });
+    // },
+    createEvent: async (args) => {
+      try {
+        const { title, description, price, date } = args.eventInput;
+
+        // create mongoose object
+        const event = new Event({
+          title: title,
+          description: description,
+          price: +price,
+          date: new Date( date ),
+          creator: '5ff402f05e96c9e87afadee2'
         });
+
+        const savedEvent = await event.save();
+        const user = await User.findById('5ff402f05e96c9e87afadee2');
+        if (!user) {
+          throw new Error('User does not exist');
+        }
+        user.createdEvents.push(event);
+        await user.save();
+        return savedEvent;
+      } 
+      catch (err) {
+        throw err;
+      }
     },
-    createUser: (args) => {
-      return User.findOne({email:args.userInput.email})
-        .then( user => {
-          if (user) {
-            throw new Error('User already exists');
-          }
-          return bcrypt.hash(args.userInput.password, 12);
-        })      
-        .then( hashedPassword => {
-          const user = new User({
-            email: args.userInput.email,
-            password: hashedPassword
-          });
-          return user.save();
-        })
-        .then( user => {
-          return { ...user._doc, password: null };
-        })
-        .catch( err => {
-          throw err;
-        });
+    // createUser: (args) => {
+    //   return User.findOne({email:args.userInput.email})
+    //     .then( user => {
+    //       if (user) {
+    //         throw new Error('User already exists');
+    //       }
+    //       return bcrypt.hash(args.userInput.password, 12);
+    //     })      
+    //     .then( hashedPassword => {
+    //       const user = new User({
+    //         email: args.userInput.email,
+    //         password: hashedPassword
+    //       });
+    //       return user.save();
+    //     })
+    //     .then( user => {
+    //       return { ...user._doc, password: null };
+    //     })
+    //     .catch( err => {
+    //       throw err;
+    //     });
       
+    // }
+    createUser: async (args) => {
+      try {
+        const { email, password } = args.userInput;
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          throw new Error('User already exists');
+        }
+
+        const user = new User({email, password: bcrypt.hashSync(password, 10)});
+        const res = await user.save();
+        return { ...res._doc, password: null };
+      } 
+      catch (err) {
+        throw err;
+      }
     }
 
   },
