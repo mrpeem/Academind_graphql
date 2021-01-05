@@ -1,0 +1,7 @@
+{
+	"env" : {
+		"MONGO_USER": "peem",
+		"MONGO_PASSWORD": "mongodbpassword",
+		"MONGO_DB": "events-react-dev"
+	}
+}
