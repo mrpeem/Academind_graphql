@@ -1,9 +1,112 @@
 import React, { Component } from 'react';
 
+import './Auth.css';
+
 class AuthPage extends Component {
+  state = {
+    isLogin: true
+  }
+  constructor(props) {
+    super(props);
+    this.emailElement = React.createRef();
+    this.passwordElement = React.createRef();
+  }
+
+  switchModeHander = () => {
+    this.setState(prevState => {
+      return {isLogin: !prevState.isLogin}
+    })
+  }
+  submitHander = (e) => {
+    e.preventDefault();
+
+    const email = this.emailElement.current.value;
+    const password = this.passwordElement.current.value;
+
+    if (email.trim().length === 0 || password.trim().length === 0) {
+      return;
+    }
+
+    // login
+    let body = {
+      query: `
+        query {
+          login(
+            email: "${email}",
+            password: "${password}"
+          ) {
+            userId
+            token
+            tokenExpiration
+          }
+        }
+      `
+    };
+
+    // sign up
+    if (!this.state.isLogin) {
+      body = {
+        query: `
+          mutation {
+            createUser(userInput: {
+              email: "${email}",
+              password: "${password}"
+            }) {
+              _id
+              email
+            }
+          }
+        `
+      };
+    }
+
+    fetch('http://localhost:5000/graphql', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => {
+      if (res.status !== 200 && res.status !== 201) {
+        throw new Error('Failed');
+      }
+      return res.json();
+    })
+    .then(res => {
+      console.log(res);
+    })
+    .catch(err => {
+      console.log(err)
+    });
+
+  }
+
   render() {
     return (
-      <h1> auth page </h1>
+      <form className="auth-form" onSubmit={this.submitHander}>
+        <div className="form-control">
+          <label htmlFor="email"> Email </label>
+          <input type="email" id="email" ref={this.emailElement}/>
+        </div>
+
+        <div className="form-control">
+          <label htmlFor="password"> Password </label>
+          <input type="password" id="password" ref={this.passwordElement}/>
+        </div>
+
+        <div className="form-actions">
+          <button type="submit"> submit </button>
+          <button 
+            type="button" 
+            onClick={this.switchModeHander}
+          > 
+            switch to {this.state.isLogin ? 'Signup' : 'Login'} 
+          </button>
+        </div>
+
+
+      </form>
     );
   }
 }
