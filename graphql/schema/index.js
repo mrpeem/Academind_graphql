@@ -35,9 +35,16 @@ module.exports = buildSchema(`
     updatedAt: String!
   }
 
+  type AuthDataType {
+    userId: ID!
+    token: String!
+    tokenExpiration: Int!
+  }
+
   type RootQuery {
     events: [EventType!]!
     bookings: [BookingType!]!
+    login(email: String!, password: String!): AuthDataType
   } 
   type RootMutation {
     createEvent(eventInput: EventInput): EventType
