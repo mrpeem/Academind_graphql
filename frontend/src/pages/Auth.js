@@ -1,22 +1,27 @@
 import React, { Component } from 'react';
 
 import './Auth.css';
+import AuthContext from '../context/auth-context';
 
 class AuthPage extends Component {
   state = {
     isLogin: true
-  }
+  };
+
+  static contextType = AuthContext;
+
   constructor(props) {
     super(props);
     this.emailElement = React.createRef();
     this.passwordElement = React.createRef();
-  }
+  };
 
   switchModeHander = () => {
     this.setState(prevState => {
       return {isLogin: !prevState.isLogin}
     })
-  }
+  };
+
   submitHander = (e) => {
     e.preventDefault();
 
@@ -74,13 +79,16 @@ class AuthPage extends Component {
       return res.json();
     })
     .then(res => {
-      console.log(res);
+      if (res.data.login.token) {
+        const data = res.data.login;
+        this.context.login(data.token, data.userId, data.tokenExpiration); 
+      }
     })
     .catch(err => {
       console.log(err)
     });
 
-  }
+  };
 
   render() {
     return (
@@ -104,8 +112,6 @@ class AuthPage extends Component {
             switch to {this.state.isLogin ? 'Signup' : 'Login'} 
           </button>
         </div>
-
-
       </form>
     );
   }
