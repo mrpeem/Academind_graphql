@@ -14,9 +14,14 @@ const mainNavigation = (props) => (
           </div>
           <nav className="main-navigation__items">
             <ul>
-              {!context.token && <li> <NavLink to="/auth">auth nav link</NavLink> </li>}
-              <li> <NavLink to="/events">events nav link</NavLink> </li>
-              {context.token && <li> <NavLink to="/bookings">bookings nav link</NavLink> </li>}
+              {!context.token && <li> <NavLink to="/auth">Authenticate</NavLink> </li>}
+              <li> <NavLink to="/events">Events</NavLink> </li>
+              {context.token && (
+                <React.Fragment>
+                  <li> <NavLink to="/bookings">Bookings</NavLink> </li>
+                  <li> <button onClick={context.logout}> Logout </button> </li>
+                </React.Fragment>
+              )}
             </ul>
 
           </nav>
