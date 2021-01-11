@@ -55,15 +55,14 @@ class EventsPage extends Component {
       return; 
     }
 
-    // sign up
     const body = {
       query: `
-        mutation {
+        mutation CreateEvent($title: String!, $desc: String!, $price: Float!, $date: String!) {
           createEvent(eventInput: {
-            title: "${title}",
-            date: "${date}",
-            price: ${price},
-            description: "${description}"
+            title: $title,
+            date: $date,
+            price: $price,
+            description: $desc
           }) {
             _id
             title
@@ -72,7 +71,13 @@ class EventsPage extends Component {
             price
           }
         }
-      `
+      `,
+      variables: {
+        title: title,
+        desc: description,
+        price: price,
+        date: date
+      }
     };
 
     fetch('http://localhost:5000/graphql', {
@@ -173,13 +178,17 @@ class EventsPage extends Component {
     }
     const body = {
       query: `
-        mutation {
-          bookEvent (eventId: "${this.state.selectedEvent._id}"){
+        mutation BookEvent($id: ID!){
+          bookEvent (eventId: $id){
             _id
             createdAt
             updatedAt
           }
-        } `
+        } 
+      `,
+      variables: {
+        id: this.state.selectedEvent._id
+      }
     };
 
     fetch('http://localhost:5000/graphql', {
